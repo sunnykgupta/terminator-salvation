@@ -47,6 +47,10 @@ var messages = (function(cnt){
 
 App = Ember.Application.create();
 
+App.ApplicationController = Em.Controller.extend({
+	user: null
+});
+
 App.Router.map(function() {
   // put your routes here
   this.route('index',{path: '/'});
@@ -56,14 +60,32 @@ App.Router.map(function() {
 });
 
 App.IndexRoute = Ember.Route.extend({
+	beforeModel: function(){
+		if(!this.controllerFor('application').get('user')){
+			this.transitionTo('login');
+		}
+		console.log('escaped');
+	},
   model: function() {
     return { messages: messages,
-    	user: users[0]
+    	user: this.controllerFor('application').get('user')
     };
   }
 });
 
 App.LoginRoute = Ember.Route.extend({
+
+});
+
+App.LoginController = Ember.Controller.extend({
+	needs:["application"],
+	actions:{
+		login: function(username,password){
+			console.log("Setting");
+			this.get('controllers.application').set('user',users[0]);
+			this.transitionToRoute('index');
+		}
+	}
 });
 
 App.MessageView = Ember.View.extend({
@@ -71,5 +93,6 @@ App.MessageView = Ember.View.extend({
 });
 App.CreateMessageView = Ember.View.extend({
 	templateName: 'createMessage',
-	layoutName: 'modalLayout'
+	layoutName: 'modalLayout',
+
 });
